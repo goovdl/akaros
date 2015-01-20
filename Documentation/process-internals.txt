@@ -28,9 +28,9 @@ to Linux's kref:
   already a reference to it.  It is a bug to try to incref on something that has
   no references, so always make sure you incref something that you know has a
   reference.  If you don't know, you need to get it from pid2proc (which is a
-  careful way of doing this - pid2proc kref_get_not_zero()s on the reference that is
-  stored inside it).  If you incref and there are 0 references, the kernel will
-  panic.  Fix your bug / don't incref random pointers.
+  careful way of doing this - pid2proc kref_get_not_zero()s on the reference
+  that is stored inside it).  If you incref and there are 0 references, the
+  kernel will panic.  Fix your bug / don't incref random pointers.
 - Can always decref.
 - When the decref returns 0, perform some operation.  This does some final
   cleanup on the object.
@@ -196,10 +196,10 @@ amount of memory for better scalability.
 
 1.8 Things I Could Have Done But Didn't And Why:
 ---------------------------
-Q: Could we have the first reference (existence) mean it could be on the runnable
-list or otherwise in the proc system (but not other subsystems)?  In this case,
-proc_run() won't need to eat a reference at all - it will just incref for every
-current it will set up.
+Q: Could we have the first reference (existence) mean it could be on the
+runnable list or otherwise in the proc system (but not other subsystems)?  In
+this case, proc_run() won't need to eat a reference at all - it will just
+incref for every current it will set up.
 
 New A: Maybe, now that proc_run() returns.
 

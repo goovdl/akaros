@@ -590,25 +590,35 @@ void cv_init_irqsave_with_lock(struct cond_var *cv, spinlock_t *lock)
 	cv->irq_okay = TRUE;
 }
 
-void cv_lock(struct cond_var *cv)
+static inline void __cv_lock(struct cond_var *cv)
 {
 	spin_lock(cv->lock);
 }
 
-void cv_unlock(struct cond_var *cv)
+static inline void __cv_unlock(struct cond_var *cv)
 {
 	spin_unlock(cv->lock);
+}
+
+void cv_lock(struct cond_var *cv)
+{
+	__cv_lock(cv);
+}
+
+void cv_unlock(struct cond_var *cv)
+{
+	__cv_unlock(cv);
 }
 
 void cv_lock_irqsave(struct cond_var *cv, int8_t *irq_state)
 {
 	disable_irqsave(irq_state);
-	cv_lock(cv);
+	__cv_lock(cv);
 }
 
 void cv_unlock_irqsave(struct cond_var *cv, int8_t *irq_state)
 {
-	cv_unlock(cv);
+	__cv_unlock(cv);
 	enable_irqsave(irq_state);
 }
 
@@ -628,7 +638,7 @@ void cv_wait_and_unlock(struct cond_var *cv)
 {
 	unsigned long nr_prev_waiters;
 	nr_prev_waiters = cv->nr_waiters++;
-	spin_unlock(cv->lock);
+	__cv_unlock(cv);
 	/* Wait til our turn.  This forces an ordering of all waiters such that the
 	 * order in which they wait is the order in which they down the sem. */
 	while (nr_prev_waiters != nr_sem_waiters(&cv->sem))
@@ -647,7 +657,7 @@ void cv_wait(struct cond_var *cv)
 	cv_wait_and_unlock(cv);
 	if (cv->irq_okay)
 		assert(!irq_is_enabled());
-	cv_lock(cv);
+	__cv_lock(cv);
 }
 
 /* Helper, wakes exactly one, and there should have been at least one waiter. */
@@ -692,16 +702,16 @@ void __cv_broadcast(struct cond_var *cv)
 
 void cv_signal(struct cond_var *cv)
 {
-	spin_lock(cv->lock);
+	__cv_lock(cv);
 	__cv_signal(cv);
-	spin_unlock(cv->lock);
+	__cv_unlock(cv);
 }
 
 void cv_broadcast(struct cond_var *cv)
 {
-	spin_lock(cv->lock);
+	__cv_lock(cv);
 	__cv_broadcast(cv);
-	spin_unlock(cv->lock);
+	__cv_unlock(cv);
 }
 
 void cv_signal_irqsave(struct cond_var *cv, int8_t *irq_state)

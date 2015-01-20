@@ -498,9 +498,9 @@ sysenter_handler:
 	# need to check rsi, make sure it is canonical (will enfore below ULIM).
 	# need to either do this check, or handle the kernel GP fault on wrmsr.
 	movq %rsi, %rdi
-	shrq $47, %rdi
+	shrq $47, %rdi  # gvdl: WTF bigtime magic
 	cmp $0, %rdi
-	jne fastcall_pop
+	jne fastcall_pop # gvdl: just ignore error, hmm?
 	# need to use cx, dx, and ax for the wrmsr.  dx and ax are free.
 	movq %rcx, %rdi		# save rcx, the retaddr
 	movq %rsi, %rdx

@@ -327,6 +327,9 @@ events.  This is done by having the process write into an event vector table
 (like an IDT) in procdata.  For each event, the process writes the vcoreid it
 wants to be notified on.
 
+TODO(gvdl): I'm concerned about using procdata to communicate kernel
+			behaviours. A userland scribble may have very large kernel impact.
+
 4.2: Notification Specifics
 -------------------------------
 In procdata there is an array of per-vcore data, holding some
@@ -634,6 +637,13 @@ one that can do protection between entities.
 -------------------------------
 Let the kernel do what it's made to do, and in the best position to do: manage
 protection and low-level resources.
+
+TODO(gvdl): I contend it does protection, low-level and shared resources. I
+			think sharing is the key concept not the level necessarily. But if
+			resource is used by multiple processes then it is worth while
+			keeping all bookkeeping in a single place. In theory shared
+			libraries/data can do the same thing but cross process
+			synchronisation is rarely very efficient.
 
 Both processes and partitions "have" resources.  They are at different levels
 in the system.  A process actually gets to use the resources.  A partition is
